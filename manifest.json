@@ -6,8 +6,8 @@
     "js": "index.js",
     "css": "style.css",
     "author": "chiaohu",
-    "version": "0.2.3",
-    "auto_update": false,
+    "version": "0.2.4",
+    "auto_update": true,
     "homePage": "https://github.com/wowdog0987/ST-chiaohubook",
     "description": "手動選樓層產生大綱、勾選大綱產生整合，寫入世界書。不改動樓層隱藏狀態。"
 }

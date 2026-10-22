@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>巧虎書預覽圖</title>
+<!-- 這是 README 展示圖的原始檔。用瀏覽器 headless 截圖成 docs/preview.png：
+     msedge --headless --screenshot=docs/preview.png --window-size=1600,900 docs/preview.html -->
+<style>
+    /* 暖奶油黃配色：淡黃底、奶油白卡片、深咖啡字、琥珀棕重點 */
+    :root {
+        --bg: #fde3a0;
+        --bg-2: #fbd889;
+        --card: #fffaf0;
+        --card-2: #fff3dc;
+        --border: #f0d6a2;
+        --border-2: #e6c487;
+        --text: #3b1f0e;
+        --muted: #8a6a48;
+        --accent: #9c5d12;
+        --accent-2: #b8741c;
+        --accent-soft: #fbe6bf;
+        --warn: #b4531a;
+        --ok: #7a5a14;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        width: 1600px;
+        height: 900px;
+        background: radial-gradient(1100px 700px at 15% 10%, #fee9b6, transparent 70%), var(--bg);
+        color: var(--text);
+        font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+        font-size: 15px;
+        padding: 44px 56px;
+    }
+    header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .brand { display: flex; align-items: center; gap: 18px; }
+    .logo {
+        width: 84px; height: 84px; border-radius: 22px; background: var(--card);
+        border: 1px solid var(--border-2); display: grid; place-items: center; font-size: 46px;
+        box-shadow: 0 6px 18px rgba(156, 93, 18, 0.12);
+    }
+    h1 { margin: 0; font-size: 50px; letter-spacing: 2px; color: var(--text); font-weight: 900; line-height: 1.05; }
+    h1 small { font-size: 21px; color: var(--accent); font-weight: 600; margin-left: 12px; letter-spacing: 0.5px; }
+    .tagline { margin-top: 6px; font-size: 18px; color: var(--muted); }
+    .pills { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; max-width: 820px; }
+    .pill { white-space: nowrap; border-radius: 999px; padding: 7px 15px; font-size: 14px; background: var(--card); border: 1px solid var(--border-2); color: var(--text); }
+    .pill b { color: var(--accent); font-weight: 700; }
+    .pill.solid { background: var(--accent); border-color: var(--accent); color: #fff8ea; }
+    .pill.solid b { color: #fff8ea; }
+
+    .stage { display: grid; grid-template-columns: 840px 1fr; gap: 28px; }
+    .window {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        box-shadow: 0 10px 30px rgba(156, 93, 18, 0.10);
+        padding: 22px 24px;
+    }
+    .win-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .win-head b { font-size: 18px; }
+    .select {
+        flex: 1; max-width: 430px;
+        border: 1px solid var(--border-2); background: #fff; border-radius: 10px;
+        padding: 7px 12px; font-size: 14px; display: flex; justify-content: space-between;
+    }
+    .tabs { display: flex; gap: 6px; margin: 14px 0 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .btn {
+        background: #fff; border: 1px solid var(--border-2); border-radius: 999px;
+        padding: 7px 16px; font-size: 14px; color: var(--text); white-space: nowrap;
+    }
+    .btn.active { background: var(--accent-soft); border-color: var(--accent-2); color: var(--accent); font-weight: 700; }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff8ea; font-weight: 700; }
+    .btn.dim { opacity: 0.45; }
+    .muted { color: var(--muted); font-size: 13.5px; }
+    .row { display: flex; align-items: center; gap: 10px; margin: 10px 0; flex-wrap: wrap; }
+    .input {
+        border: 1px solid var(--border-2); background: #fff; border-radius: 10px;
+        padding: 6px 12px; min-width: 76px; font-variant-numeric: tabular-nums;
+    }
+    .info { background: var(--card-2); border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; margin: 10px 0; line-height: 1.75; }
+    .quote { color: #6e5236; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .horae { color: var(--ok); font-size: 14px; font-weight: 600; }
+    .warn { color: var(--warn); font-size: 14px; }
+    .tokens { font-size: 14px; }
+    .tokens b { color: var(--accent); }
+
+    .callout {
+        position: relative; margin-top: 18px; padding: 14px 18px; border-radius: 14px;
+        border: 1.5px dashed var(--border-2); background: #fffdf7; line-height: 1.75;
+    }
+    .callout h4 { margin: 0 0 4px; font-size: 15px; color: var(--accent); }
+    .callout code { background: var(--accent-soft); border-radius: 6px; padding: 1px 8px; font-size: 13.5px; color: var(--text); }
+
+    .right { display: flex; flex-direction: column; gap: 24px; }
+    .popup h3 { margin: 0 0 6px; font-size: 18px; }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 14px; }
+    td { padding: 8px 8px; border-bottom: 1px solid var(--border); }
+    td:last-child { text-align: right; }
+    .btns { display: flex; gap: 8px; justify-content: flex-end; }
+
+    .list { border: 1px solid var(--border); border-radius: 14px; padding: 6px; margin: 8px 0; background: #fffdf7; }
+    .item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 8px; font-size: 14px; }
+    .item.on { background: var(--card-2); }
+    .box { width: 15px; height: 15px; border: 1.5px solid #c9a774; border-radius: 4px; flex: none; background: #fff; }
+    .box.on { background: var(--accent); border-color: var(--accent); position: relative; }
+    .box.on::after { content: "✓"; position: absolute; top: -4px; left: 1px; font-size: 13px; color: #fff8ea; font-weight: 900; }
+    .tag { font-size: 11.5px; padding: 1px 8px; border: 1px solid var(--border-2); border-radius: 9px; color: var(--muted); white-space: nowrap; background: #fff; }
+    .tag.here { color: var(--accent); border-color: var(--accent-2); background: var(--accent-soft); }
+    .selected { font-size: 14px; margin: 6px 0 10px; }
+    .selected b { color: var(--accent); }
+
+    footer { position: absolute; left: 56px; right: 56px; bottom: 26px; display: flex; justify-content: space-between; font-size: 13.5px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+    <div class="brand">
+        <div class="logo">🐯</div>
+        <div>
+            <h1>巧虎書<small>Chiaohu Book</small></h1>
+            <div class="tagline">自己選樓層寫大綱、自己挑大綱做整合的 SillyTavern 記憶插件</div>
+        </div>
+    </div>
+    <div class="pills">
+        <span class="pill solid"><b>不碰</b>樓層隱藏狀態</span>
+        <span class="pill">搬窗<b>不打架</b></span>
+        <span class="pill">讀取 <b>HORAE</b> 時間地點</span>
+        <span class="pill">送出前<b>預估 Token</b></span>
+        <span class="pill"><b>自動建議</b>拆段</span>
+    </div>
+</header>
+
+<div class="stage">
+    <!-- 主面板：產生大綱 -->
+    <div class="window">
+        <div class="win-head">
+            <b>📖 巧虎書</b>
+            <span class="muted">世界書</span>
+            <div class="select"><span>雷恩 大綱書（目前聊天綁定）</span><span>▾</span></div>
+        </div>
+        <div class="tabs">
+            <span class="btn active">產生大綱</span>
+            <span class="btn">手動新增</span>
+            <span class="btn">產生整合</span>
+            <span class="btn">設定</span>
+        </div>
+        <div class="muted">最新樓層 #186（樓層號碼同 ST 訊息上的 #）· 這個聊天已有 6 條大綱 · 下一條編號 007</div>
+        <div class="row">
+            <span>起始層</span><span class="input">121</span>
+            <span>結束層</span><span class="input">186</span>
+            <span class="btn">填入建議</span>
+        </div>
+        <div class="info">
+            <div>範圍內有 64 層有內容，其中 <b>40 層已隱藏</b>（仍會讀取）</div>
+            <div class="horae">HORAE：時間：2025-03-08 晚上｜地點：港口燈塔 → 時間：2025-03-10 早上｜地點：車站</div>
+            <div class="quote">開頭 #121 艾莉：「你真的要在這種天氣出海？燈塔那邊已經掛起暴風信號了……」</div>
+            <div class="quote">結尾 #186 雷恩：「下次見面的時候，把那本筆記還給我。說好了。」</div>
+            <div class="warn">⚠ 和這個聊天已有的大綱重疊：[大綱 006] 110-125層 - 燈塔的約定（仍可生成）</div>
+        </div>
+        <div class="row"><span>附上此聊天前面的大綱作為背景</span><span class="input" style="min-width:48px">0</span><span>條</span></div>
+        <div class="tokens">預估送出 ≈ <b>9,840</b> tokens（不含回應）</div>
+        <div class="row" style="margin-top:14px">
+            <span class="btn primary">產生大綱</span>
+            <span class="btn dim">停止</span>
+        </div>
+
+        <div class="callout">
+            <h4>寫進世界書的樣子</h4>
+            <div><code>[大綱 007] 121-186層 - 燈塔與車站</code></div>
+            <div class="muted" style="margin-top:6px">- 2025-03-08 晚上，港口燈塔：暴風信號掛起後艾莉勸雷恩別出海，雷恩仍堅持出發，兩人為此第一次吵架；艾莉事後送來防水外套，雷恩收下並道歉。</div>
+            <div class="muted">- 2025-03-10 早上，車站：雷恩把筆記交給艾莉保管，說「下次見面的時候，把那本筆記還給我。說好了。」</div>
+        </div>
+    </div>
+
+    <div class="right">
+        <!-- 拆段建議 -->
+        <div class="window popup">
+            <h3>建議拆段</h3>
+            <div class="muted">這段跨了 3 天，建議拆成 3 條大綱：</div>
+            <table>
+                <tr><td>121-140 層</td><td>2025-03-08</td><td>約 3,120 tokens</td></tr>
+                <tr><td>141-169 層</td><td>2025-03-09</td><td>約 4,050 tokens</td></tr>
+                <tr><td>170-186 層</td><td>2025-03-10</td><td>約 2,670 tokens</td></tr>
+            </table>
+            <div class="muted" style="margin-bottom:12px">在本機規劃，不呼叫 AI、不花 Token。拆開後依序產生，每條都先預覽再寫入。</div>
+            <div class="btns">
+                <span class="btn primary">照建議拆開</span>
+                <span class="btn">仍然一次產生</span>
+                <span class="btn">取消</span>
+            </div>
+        </div>
+
+        <!-- 產生整合 -->
+        <div class="window">
+            <div class="tabs" style="margin-top:0">
+                <span class="btn">產生大綱</span>
+                <span class="btn">手動新增</span>
+                <span class="btn active">產生整合</span>
+            </div>
+            <div class="list">
+                <div class="item on"><span class="box on"></span>[大綱 001] 0-38層 - 雨夜的書店<span class="tag here">此聊天</span></div>
+                <div class="item on"><span class="box on"></span>[大綱 002] 39-77層 - 借來的雨傘<span class="tag here">此聊天</span></div>
+                <div class="item on"><span class="box on"></span>[大綱 003] 78-109層 - 港口市集<span class="tag here">此聊天</span></div>
+                <div class="item"><span class="box"></span>[大綱 004] 前視窗 - 初次見面<span class="tag">記憶書</span></div>
+            </div>
+            <div class="selected">已選 3 條：大綱001-003 → 將寫成 <b>[整合 01]</b></div>
+            <div class="muted" style="margin-bottom:12px">整合後原本的大綱會停用、保留，隨時可以回頭查。</div>
+            <div class="btns"><span class="btn primary">產生整合</span></div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <span>github.com/wowdog0987/ST-chiaohubook</span>
+    <span>MIT License</span>
+</footer>
+</body>
+</html>
