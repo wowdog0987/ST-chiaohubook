@@ -1,0 +1,13 @@
+{
+    "display_name": "巧虎書 Chiaohu Book",
+    "loading_order": 110,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "author": "chiaohu",
+    "version": "0.2.3",
+    "auto_update": false,
+    "homePage": "https://github.com/wowdog0987/ST-chiaohubook",
+    "description": "手動選樓層產生大綱、勾選大綱產生整合，寫入世界書。不改動樓層隱藏狀態。"
+}
