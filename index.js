@@ -417,10 +417,22 @@ function cleanText(text, regexes) {
  * HORAE 會把 <horae> 標籤解析後存在 message.horae_meta。
  * 這裡逐層累積日期、時間、地點，跟 HORAE 的 getLatestState 同樣的規則（有值才覆蓋）。
  */
+/**
+ * 把 HORAE 的日期統一成 YYYY-MM-DD。
+ * HORAE 同一天可能寫成 2026/11/4、2026/11/04、2026/11/5 (四)，直接比對字串會被當成不同天。
+ * 認不出年月日的格式（例如「第三天」）就只去掉括號註記、原樣保留。
+ */
+function normalizeDate(value) {
+    const s = String(value ?? '').trim();
+    const m = s.match(/(\d{1,4})\s*[/\-.年]\s*(\d{1,2})\s*[/\-.月]\s*(\d{1,2})/);
+    if (m) return `${m[1]}-${pad(Number(m[2]), 2)}-${pad(Number(m[3]), 2)}`;
+    return s.replace(/\s*[(（][^)）]*[)）]\s*/g, ' ').trim();
+}
+
 function applyHoraeMeta(state, message) {
     const meta = message?.horae_meta;
     if (!meta || meta._skipHorae) return;
-    if (meta.timestamp?.story_date) state.date = String(meta.timestamp.story_date).trim();
+    if (meta.timestamp?.story_date) state.date = normalizeDate(meta.timestamp.story_date);
     if (meta.timestamp?.story_time) state.time = String(meta.timestamp.story_time).trim();
     if (meta.scene?.location) state.location = String(meta.scene.location).trim();
 }
