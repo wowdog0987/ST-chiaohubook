@@ -916,6 +916,12 @@ function panelHtml() {
         <textarea class="text_pole chb-big" rows="10" data-setting="integrationPrompt">${esc(effectivePrompt('integrationPrompt'))}</textarea>
         <button class="menu_button" data-reset="integrationPrompt">還原預設整合提示詞</button> <span class="chb-muted" data-prompt-state="integrationPrompt">${s.integrationPrompt ? '已自訂' : '使用預設（插件更新時自動套用新版）'}</span>
 
+        <h4>清理聊天檔</h4>
+        <div class="chb-muted">只整理目前開啟的聊天。沒選用的重骰和思考過程不會送給 AI，刪掉只會讓檔案變小，不影響劇情和 Token。刪除後無法復原。</div>
+        <label class="checkbox_label"><input type="checkbox" id="chb-clean-swipes" checked> 刪除沒選用的重骰版本（最後一則保留，方便繼續重骰）</label>
+        <label class="checkbox_label"><input type="checkbox" id="chb-clean-reasoning"> 刪除模型思考過程紀錄（訊息上可展開的「思考」會消失）</label>
+        <button class="menu_button" id="chb-clean">檢查並清理</button>
+
         <h4>除錯</h4>
         <button class="menu_button" id="chb-last-raw">查看上次 AI 原始回應</button>
     </section>
@@ -1354,6 +1360,79 @@ async function runIntegration() {
     }
 }
 
+// ---------- 清理聊天檔 ----------
+
+const REASONING_KEYS = ['reasoning', 'reasoning_duration', 'reasoning_signature', 'reasoning_type'];
+const byteSize = value => new TextEncoder().encode(JSON.stringify(value ?? '')).length;
+
+/**
+ * 逐則訊息處理：swipes 和跟它等長的陣列（swipe_info、MVU 的 variables 等）只留目前選用的那一版。
+ * dryRun 時只計算不修改。最後一則訊息保留重骰，方便繼續選。
+ */
+function cleanChat({ swipes, reasoning, dryRun }) {
+    const chat = getContext().chat || [];
+    const last = chat.length - 1;
+    const stats = { messages: 0, swipes: 0, reasoning: 0, bytes: 0 };
+    chat.forEach((message, index) => {
+        if (!message) return;
+        let touched = false;
+        if (swipes && index !== last && Array.isArray(message.swipes) && message.swipes.length > 1) {
+            const n = message.swipes.length;
+            const keep = Math.min(Math.max(0, Number(message.swipe_id) || 0), n - 1);
+            for (const [key, value] of Object.entries(message)) {
+                if (!Array.isArray(value) || value.length !== n) continue;
+                stats.bytes += byteSize(value) - byteSize([value[keep]]);
+                if (!dryRun) message[key] = [value[keep]];
+            }
+            if (!dryRun) message.swipe_id = 0;
+            stats.swipes += n - 1;
+            touched = true;
+        }
+        if (reasoning) {
+            const holders = [message.extra, ...(Array.isArray(message.swipe_info) ? message.swipe_info.map(s => s?.extra) : [])];
+            for (const extra of holders) {
+                if (!extra || !extra.reasoning) continue;
+                for (const key of REASONING_KEYS) {
+                    if (!(key in extra)) continue;
+                    stats.bytes += byteSize(extra[key]);
+                    if (!dryRun) delete extra[key];
+                }
+                stats.reasoning++;
+                touched = true;
+            }
+        }
+        if (touched) stats.messages++;
+    });
+    return stats;
+}
+
+async function runCleanup() {
+    if (state.busy) return toastr.warning('正在產生中，請等完成後再清理', '巧虎書');
+    const $root = state.$root;
+    const options = { swipes: $root.find('#chb-clean-swipes').prop('checked'), reasoning: $root.find('#chb-clean-reasoning').prop('checked') };
+    if (!options.swipes && !options.reasoning) return toastr.info('請至少勾選一個項目', '巧虎書');
+    const chatId = currentChatId();
+    const plan = cleanChat({ ...options, dryRun: true });
+    if (!plan.messages) return toastr.info('這個聊天沒有可以清理的內容', '巧虎書');
+    const parts = [];
+    if (plan.swipes) parts.push(`${plan.swipes} 個沒選用的重骰版本`);
+    if (plan.reasoning) parts.push(`${plan.reasoning} 筆思考過程`);
+    const kb = Math.max(1, Math.round(plan.bytes / 1024));
+    const ok = await Popup.show.confirm('清理聊天檔', `將從 ${plan.messages} 則訊息刪除 ${parts.join('、')}，約省下 ${kb} KB。<br>刪除後無法復原，確定要清理嗎？`);
+    if (!ok) return;
+    if (currentChatId() !== chatId) return toastr.warning('聊天已經切換，沒有清理', '巧虎書');
+    const done = cleanChat({ ...options, dryRun: false });
+    try {
+        const ctx = getContext();
+        await ctx.saveChat();
+        await ctx.reloadCurrentChat();
+        toastr.success(`已清理 ${done.messages} 則訊息，約省下 ${kb} KB`, '巧虎書');
+    } catch (error) {
+        console.error(LOG, error);
+        toastr.error(`儲存失敗：${error.message}`, '巧虎書');
+    }
+}
+
 function stopGeneration() {
     if (!state.abort) return;
     state.abort.abort();
@@ -1434,6 +1513,7 @@ function bindPanel($root) {
         $root.find(`[data-setting="${key}"]`).val(DEFAULT_PROMPTS[key]);
         $root.find(`[data-prompt-state="${key}"]`).text('使用預設（插件更新時自動套用新版）');
     });
+    $root.on('click', '#chb-clean', runCleanup);
     $root.on('click', '#chb-last-raw', () => {
         const raw = settings().lastRaw || '（還沒有紀錄）';
         new Popup(`<div class="chb-form"><h3>上次 AI 原始回應</h3><textarea class="text_pole chb-big" rows="20" readonly>${esc(raw)}</textarea></div>`,
